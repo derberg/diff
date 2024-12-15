@@ -5,6 +5,8 @@ import {
   getBeforeValue,
   setIndex,
   formatDiffOutput,
+  getDocumentMajorVersion,
+  incompatibleDocuments,
 } from '../../src/helpers/DiffHelpers';
 import { DiffOutput } from '../../src/types';
 import {
@@ -66,7 +68,7 @@ describe('formatDiffOutput function', () => {
   test('should throw error when firstDocuments is empty', () => {
     expect(() => formatDiffOutput(diffRemove as Operation[], {})).toThrowError(
       // eslint-disable-next-line quotes
-      new TypeError("Cannot read property 'production' of undefined")
+      new TypeError("Cannot read properties of undefined (reading 'production')")
     );
   });
 
@@ -74,5 +76,19 @@ describe('formatDiffOutput function', () => {
     expect(
       formatDiffOutput(diffEdit as Operation[], modifyDiffInput)
     ).toStrictEqual(diffEditOutput);
+  });
+});
+
+describe('between different asyncapi version', () => {
+  test('should return correct asyncapi major version', () => {
+    expect(getDocumentMajorVersion({asyncapi: '3.0.0'})).toEqual('3');
+  });
+
+  test('documents are incompatible', () => {
+    expect(incompatibleDocuments({asyncapi: '3.0.0'}, {asyncapi: '2.1.0'})).toBeTruthy();
+  });
+
+  test('documents are compatible', () => {
+    expect(incompatibleDocuments({asyncapi: '3.0.0'}, {asyncapi: '3.0.0'})).toBeFalsy();
   });
 });
